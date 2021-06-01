@@ -1068,10 +1068,11 @@ void getAllUsersData() {
 		else if (counter == 14) {
 			istringstream(dataline) >> number_of_doses_taken;
 
-			if (number_of_doses_taken > 0) {
+			if (number_of_doses_taken >= 0) {
 				if (u.getVaccine().getVaccineCompanyName() != " ") {
 					if (u.getVaccine().getNumberofDose() - number_of_doses_taken == u.getVaccine().getNumberofDose()) {
 						User::VaccinedUsers++;
+						User::oneDoseNo++;
 					}
 					else if (u.getVaccine().getNumberofDose() - number_of_doses_taken == u.getVaccine().getNumberofDose() - 1) {
 						User::oneDoseNo++;
