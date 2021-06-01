@@ -36,8 +36,8 @@ void SingIn(); //Sign In (LogIn) function
 void Register(); //Register Function
 void AdminLogIn(); //AdminLogin
 void AdminPage(); //Admin Page
-void RequestVaccine(User &u , int index);
-void getAllUsersDate();
+void RequestVaccine(User& u, int index);
+void getAllUsersData();
 void saveData();
 void DisplayData(string id);
 int checkIdValidation(string id);
@@ -47,6 +47,7 @@ bool checkEmail(string email);
 bool checkCountryExsist(string country);
 bool checkGovernExsist(string govern);
 void DisplayStats();
+void displayInformation(User user);
 
 
 
@@ -61,13 +62,21 @@ int main() {
 
 	while (true) {
 		string answer;
-		cout << "\t\t\t1-Sign In \t 2-Register\t\t3-Close System\t\t\t\n";
+
+
+		Table menue;
+
+		menue.add_row({ "1-Sign In","2- Register","3-Close System" });
+		menue.row(0).format().font_color(Color::yellow);
+		cout << menue << endl;
+		cout << "Choose what do you Want : ";
+
 		ws(cin);
 		getline(cin, answer);
 		string rev_string = answer;
 		int len = answer.length();
 		bool fal = true;
-		switch(answer[0])
+		switch (answer[0])
 		{
 		case '1':
 			SingIn();
@@ -102,9 +111,13 @@ void SingIn() {
 
 	string mytext;
 	ifstream data("Files\\Accounts.txt");
+	for (int i = 0; i < dataUsersLogIn.getcount(); i++) {
+		dataUsersLogIn.RemoveElement(i);
+	}
 	while (getline(data, mytext))
 	{
 		dataUsersLogIn.append(mytext);
+
 	}
 	data.close();
 
@@ -113,10 +126,10 @@ void SingIn() {
 	bool flagid = 0;
 	bool flagpass = 0;
 	int counter = 0;
-	cout << "enter your id\nid:";
+	cout << "enter your id : ";
 	ws(cin);
 	getline(cin, id);
-	cout << "please enter your password\npass:";
+	cout << "please enter your password : ";
 	ws(cin);
 	getline(cin, password);
 
@@ -161,18 +174,310 @@ void SingIn() {
 				break;
 			}
 		}
-		while (true) {
+		bool Delete = false;
+		while (!Delete) {
+			User user;
+			int index;
+			for (int i = 0; i < users.getcount(); i++) {
+				if (id == users.getElementAtposition(i).getNationalID()) {
+					user = users.getElementAtposition(i);
+					index = i;
+					break;
+				}
+			}
 			int answer;
-			cout << "1-Request Vaccine\n2-See Vaccines Information\n3-Log Out" << endl;
+			Table menue;
+
+			menue.add_row({ "1- Request Vaccine","2- See Vaccines Information","3-Show Information","4-Update", "5-Delete Account", "6-Log Out" });
+			menue.row(0).format().font_color(Color::yellow);
+
+			cout << menue << endl;
+			cout << "Choose what do you Want : ";
 			cin >> answer;
 			if (answer == 1)
-				RequestVaccine(u , index);
+				RequestVaccine(u, index);
 			else if (answer == 2)
 				displayVaccinesInfo();
-			else if (answer == 3)
+			else if (answer == 3) {
+
+				displayInformation(user);
+
+			}
+			else if (answer == 4) {
+
+				Table table;
+				table.add_row({ "1-Name", "2-Age", "3-Gender", "4-Country","5-Government","6-Address","7-Phone","8-Password","9-Email"});
+				table.row(0).format().font_background_color(Color::red).font_style({ FontStyle::bold, FontStyle::italic });
+
+
+				cout << table << endl << endl;
+				while (true) {
+					int num;
+					cout << "Enter number the feild that you want to Update : ";
+					cin >> num;
+					if (num == 1) {
+						string name;
+						cout << "Your current Name is : " << user.getName() << endl;
+						cout << "Enter Your New Name : ";
+						ws(cin);
+						getline(cin, name);
+						user.setName(name);
+						users.RemoveElement(index);
+						users.insert(index, user);
+						break;
+					}
+					else if (num == 2) {
+						int Age;
+						cout << "Your old Age is : " << user.getAge() << endl;
+						cout << "Enter Your New Name : ";
+						cin >> Age;
+						user.setAge(Age);
+						users.RemoveElement(index);
+						users.insert(index, user);
+						break;
+					}
+					else if (num == 3) {
+						string Gender;
+						cout << "Your current Gender is : " << user.getAge() << endl;
+						while (true) {
+							cout << "Enter Your New Gender : ";
+							ws(cin);
+							getline(cin, Gender);
+							for_each(Gender.begin(), Gender.end(), [](char& c) {
+								c = tolower(c);
+								});
+
+							if (Gender == "male" || Gender == "female") {
+								break;
+							}
+							else {
+								cout << "Wrong , Make Sure to enter your gender as (male or female)" << endl;
+							}
+						}
+						user.setGender(Gender);
+						users.RemoveElement(index);
+						users.insert(index, user);
+						break;
+
+					}
+					else if (num == 4) {
+
+						string country;
+						string govern;
+						cout << "Your Previous Country : " << users.getElementAtposition(index).getCountry() << endl;
+						while (true) {
+							cout << "Enter Your New Country : ";
+							ws(cin);
+							getline(cin, country);
+							bool check = checkCountryExsist(country);
+							if (check) {
+								break;
+							}
+							else {
+								cout << "This Country Doesn't Exsist , Please Enter Your Country" << endl;
+							}
+						}
+						if (country == "egypt") {
+							while (true) {
+								cout << "Enter Your Government : ";
+								ws(cin);
+								getline(cin, govern);
+								bool check = checkGovernExsist(govern);
+								if (check) {
+									break;
+								}
+								else {
+									cout << "This Government Doesn't Exsist , Please Enter Your Government" << endl;
+								}
+							}
+						}
+						else {
+							govern = "none";
+						}
+
+						user.setCountry(country);
+						user.setGovern(govern);
+						users.RemoveElement(index);
+						users.insert(index, user);
+						break;
+
+					}
+					else if (num == 5) {
+						string govern;
+						while (true) {
+							cout << "Enter Your Government : ";
+							ws(cin);
+							getline(cin, govern);
+							bool check = checkGovernExsist(govern);
+							if (check) {
+								break;
+							}
+							else {
+								cout << "This Government Doesn't Exsist , Please Enter Your Government" << endl;
+							}
+						}
+
+						user.setGovern(govern);
+						users.RemoveElement(index);
+						users.insert(index, user);
+						break;
+					}
+					else if (num == 6) {
+						cout << "Your old Adress is : " << user.getAddress() << endl;
+						string address;
+						while (true) {
+							int Isnumber = 0;
+							cout << "Enter Address : ";
+							ws(cin);
+							getline(cin, address);
+							for (int i = 0; i < address.length(); i++) {
+								int ascinumber = (int)address[i];
+								if (ascinumber >= 48 && ascinumber <= 57) {
+									Isnumber = 1;
+								}
+
+							}
+							if (Isnumber == 1) {
+								break;
+							}
+							else
+								cout << "address should has number of street" << endl;
+						}
+						user.setAddress(address);
+						users.RemoveElement(index);
+						users.insert(index, user);
+						break;
+					}
+					else if (num == 7) {
+						cout << "Your current Phone is : " << user.getphoneNumber() << endl;
+						string phoneNumber;
+						int lengthOfPhone = 0;
+						while (true) {
+							cout << "Enter Phone Number : ";
+							ws(cin);
+							getline(cin, phoneNumber);
+							lengthOfPhone = phoneNumber.length();
+							if (lengthOfPhone == 11) {
+								if (checkPhoneNumber(phoneNumber))
+									break;
+							}
+							else
+								cout << "phone number must be 11 digits" << endl;
+						}
+						user.setphoneNumber(phoneNumber);
+						users.RemoveElement(index);
+						users.insert(index, user);
+						break;
+					}
+					else if (num == 8) {
+						string Pass;
+						int lengthOfPass = 0;
+						bool LowerLetter, IsNumber, SpecialCharacter, UpperLetter = false;
+						while (true) {
+
+							cout << "Enter Password (your password must be more than 8 digits and like Password123$ ): ";
+							ws(cin);
+							getline(cin, Pass);
+
+							lengthOfPass = Pass.length();
+
+
+							for (int i = 0; i < lengthOfPass; i++) {
+
+								int asci_number = (int)password[i];
+								if (asci_number >= 33 && asci_number <= 45) {
+									SpecialCharacter = true;
+								}
+								if (asci_number >= 65 && asci_number <= 90) {
+									UpperLetter = true;
+								}
+								if (asci_number >= 48 && asci_number <= 57) {
+									IsNumber = true;
+								}
+								if (asci_number >= 97 && asci_number <= 122) {
+									LowerLetter = true;
+								}
+
+							}
+
+							if (IsNumber == true && SpecialCharacter == true && UpperLetter == true && LowerLetter == true && lengthOfPass >= 8) {
+								cout << "congrats your password is valid" << endl;
+								break;
+							}
+							else
+								cout << "password is invalid" << endl;
+						}
+						user.setPassword(Pass);
+						users.RemoveElement(index);
+						users.insert(index, user);
+						break;
+					}
+					else if (num == 9) {
+						cout << "Your current Email is : " << user.getEmail() << endl;
+						string Email;
+						bool EmailChar = false;
+						while (true)
+						{
+							cout << "Enter Email : ";
+							ws(cin);
+							getline(cin, Email);
+							for (int i = 0; i < Email.length(); i++) {
+
+								int asci_number = (int)Email[i];
+								if (asci_number == 64) {
+									EmailChar = true;
+								}
+
+							}
+							if (EmailChar == true) {
+								if (checkEmail(Email)) {
+									break;
+								}
+								else {
+									cout << "This Email is already exsist" << endl;
+								}
+
+							}
+							else if (EmailChar == false) {
+								cout << "enter email like that example@.com" << endl;
+							}
+						}
+
+						user.setEmail(Email);
+						users.RemoveElement(index);
+						users.insert(index, user);
+						break;
+					}
+				}
+
+			}
+
+			else if (answer == 5) {
+				while (true) {
+					string value;
+					cout << "Are you sure to delete Your Acount (Y/N) : ";
+					cin >> value;
+					if (value[0] == 'y' || value[0] == 'Y') {
+						users.RemoveElement(index);
+						saveData();
+						User::TotalUsers--;
+						Delete = true;
+						break;
+
+					}
+					else if (value[0] == 'N' || value[0] == 'n') {
+						break;
+
+					}
+				}
+
+			}
+			else if (answer == 6) {
 				break;
+			}
+
 			else
-				cout << "Wrong Choice , Enter A Number from(1 to 3)" << endl;
+				cout << "Wrong Choice , Enter A Number from(1 to 6)" << endl;
 		}
 	}
 
@@ -201,20 +506,7 @@ void Register() {
 		ws(cin);
 		getline(cin, nid);
 		error = checkIdValidation(nid);
-		/*
-		lengthOfID = nid.length();
-		if (lengthOfID == 14) {
 
-			IDS.append(nid);
-			for (int i = 0; i < IDS.getcount(); i++) {
-				IDfile << IDS.getElementAtposition(i) << endl;
-			}
-			break;
-		}
-
-		else
-			cout << "national id is not valid" << endl;
-			*/
 
 	}
 
@@ -289,8 +581,8 @@ void Register() {
 		getline(cin, phoneNumber);
 		lengthOfPhone = phoneNumber.length();
 		if (lengthOfPhone == 11) {
-			if(checkPhoneNumber(phoneNumber))
-			break;
+			if (checkPhoneNumber(phoneNumber))
+				break;
 		}
 		else
 			cout << "phone number must be 11 digits" << endl;
@@ -395,7 +687,7 @@ void Register() {
 		password,
 		Email,
 		vac,
-		0,
+		-1,
 		false,
 		false
 	);
@@ -429,7 +721,7 @@ void getAllVaccines() {
 		case 2:
 			istringstream(text) >> whoapp;
 			Vacc.setApprove(whoapp);
-				break;
+			break;
 		case 3:
 			istringstream(text) >> NumberOfDose;
 			Vacc.setNumberofDose(NumberOfDose);
@@ -455,13 +747,13 @@ void getAllVaccines() {
 
 void displayVaccinesInfo() {
 	Table vaccTable;
-	vaccTable.add_row({ "Company", "WHO Approve", "Doses", "Storage"});
+	vaccTable.add_row({ "Company", "WHO Approve", "Doses", "Storage" });
 
 	for (int i = 0; i < allVaccs.getcount(); i++) {
 		vaccTable.add_row({
 			allVaccs.getElementAtposition(i).getVaccineCompanyName(),
-			(allVaccs.getElementAtposition(i).getApprove()?"T":"F"),
-			(to_string(allVaccs.getElementAtposition(i).getNumberofDose())+""),
+			(allVaccs.getElementAtposition(i).getApprove() ? "T" : "F"),
+			(to_string(allVaccs.getElementAtposition(i).getNumberofDose()) + ""),
 			(to_string(allVaccs.getElementAtposition(i).getDegree()) + " C")
 			});
 	}
@@ -473,8 +765,8 @@ void displayVaccinesInfo() {
 			vaccTable[i][1].format().font_color(Color::green);
 		}
 	}
-	for (int i = 0; i < 4; i++) 
-	vaccTable.column(i).format()
+	for (int i = 0; i < 4; i++)
+		vaccTable.column(i).format()
 		.font_align(FontAlign::center);
 
 	for (int i = 0; i < 4; i++) {
@@ -525,7 +817,10 @@ void AdminPage() {
 
 	while (true) {
 		int answer;
-		cout << "1-Vaccine Data \n2-See Record\n3-Vaccines Statistics\n4-Log Out\n";
+		Table table;
+		table.add_row({ "1-Vaccine Data", "2-See Record", "3-Vaccines Statistics", "4-Update Number Of Doses Taken","5-Log Out"});
+		table.row(0).format().font_background_color(Color::red).font_style({ FontStyle::bold, FontStyle::italic });
+		cout << table << endl << endl;
 		cin >> answer;
 		if (answer == 1)
 		{
@@ -542,15 +837,72 @@ void AdminPage() {
 			DisplayStats();
 		}
 		else if (answer == 4) {
+			while (true) {
+				string id;
+				int index = -1;
+				User user;
+				cout << "Enter User ID : ";
+				ws(cin);
+				getline(cin, id);
+				for (int i = 0; i < users.getcount(); i++) {
+					if (id == users.getElementAtposition(i).getNationalID()) {
+						user = users.getElementAtposition(i);
+						index = i;
+						break;
+					}
+				}
+				if (index == -1) {
+					cout << "Sorry , This id doesn't exsist , Please Try Again Later" << endl;
+					break;
+				}
+				else {
+					cout << "User Name : " << users.getElementAtposition(index).getName() << endl;
+					cout << "Number Of Doses Should Be Taken : ";
+					(users.getElementAtposition(index).getNumberOfDosesTaken() == -1) ? cout << "0" << endl : cout << users.getElementAtposition(index).getNumberOfDosesTaken() << endl;
+
+					char ch;
+					while (true) {
+						cout << "Did This User Take A Dose (Y/N) ?";
+						cin >> ch;
+						if (ch == 'Y' || ch == 'y') {
+							if (users.getElementAtposition(index).getNumberOfDosesTaken() == 0) {
+								cout << "This Person is already get Vaccined" << endl;
+								break;
+							}
+							else if (users.getElementAtposition(index).getNumberOfDosesTaken() == -1) {
+								cout << "This Person didn't request any vaccine , yet" << endl;
+								break;
+							}
+							else {
+								user.setNumberOfDosesTaken(user.getNumberOfDosesTaken() - 1);
+								users.RemoveElement(index);
+								users.insert(index, user);
+								User::oneDoseNo++;
+								saveData();
+								break;
+							}
+						}
+						else if(ch == 'n'||ch=='N') {
+							break;
+						}
+						else {
+							cout << "Wrong Answer ,Please Try Again" << endl;
+						}
+					}
+					break;
+				}
+			}
+		}
+		else if (answer == 5) {
 			break;
 		}
 		else {
-			cout << "Wrong Answer , Enter A Number from(1 to 4)" << endl;
+			cout << "Wrong Answer , Enter A Number from(1 to 5)" << endl;
 		}
 	}
 }
 
-void RequestVaccine(User &u , int index)
+void RequestVaccine(User& u, int index)
 {
 	string mytext;
 	ifstream data("Files\\Vaccines.txt");
@@ -593,7 +945,7 @@ void RequestVaccine(User &u , int index)
 
 }
 
-void getAllUsersDate() {
+void getAllUsersData() {
 	ifstream usersfile("Files/Users.txt");
 	string dataline;
 
@@ -613,7 +965,7 @@ void getAllUsersDate() {
 			u.setName(dataline); //save name in the second line
 		}
 		else if (counter == 3) {
-			stringstream(dataline)>>age;
+			stringstream(dataline) >> age;
 			u.setAge(age); //save age in the third line
 		}
 		else if (counter == 4) {
@@ -650,13 +1002,13 @@ void getAllUsersDate() {
 			u.setVaccine(Vacc);
 		}
 		else if (counter == 12) {
-			istringstream(dataline) >> getVaccined; 
+			istringstream(dataline) >> getVaccined;
 			u.setVacciend(getVaccined);
 		}
 		else if (counter == 13) {
 			istringstream(dataline) >> Abroad;
 			u.setIsAbroad(Abroad);
-			
+
 		}
 		else if (counter == 14) {
 			istringstream(dataline) >> number_of_doses_taken;
@@ -674,15 +1026,15 @@ void  DisplayData(string id) {
 	for (int i = 0; i < users.getcount(); i++) {
 		if (id == users.getElementAtposition(i).getNationalID())
 		{
-			cout <<"National ID : "<< users.getElementAtposition(i).getNationalID() << endl;
-			cout <<"Name :  "<< users.getElementAtposition(i).getName() << endl;
-			cout <<"Address: " <<users.getElementAtposition(i).getAddress() << endl;
-			cout <<"Country : "<< users.getElementAtposition(i).getCountry() << endl;
-			users.getElementAtposition(i).getIsAbroad()? cout << "" : cout << "Government : " << users.getElementAtposition(i).getGovern() << endl;
-			cout << "Email : "<<users.getElementAtposition(i).getEmail() << endl;
-			cout <<"Gender : " <<users.getElementAtposition(i).getGender() << endl;
-			cout <<"Phone Number : " <<users.getElementAtposition(i).getphoneNumber() << endl;
-			!(users.getElementAtposition(i).getVaccine().getVaccineCompanyName()==" ") ? cout << "Vaccine Company Name : " << users.getElementAtposition(i).getVaccine().getVaccineCompanyName() << "\nNumber of Doses Should be Taken : " << users.getElementAtposition(i).getNumberOfDosesTaken() << endl : cout << "";
+			cout << "National ID : " << users.getElementAtposition(i).getNationalID() << endl;
+			cout << "Name :  " << users.getElementAtposition(i).getName() << endl;
+			cout << "Address: " << users.getElementAtposition(i).getAddress() << endl;
+			cout << "Country : " << users.getElementAtposition(i).getCountry() << endl;
+			users.getElementAtposition(i).getIsAbroad() ? cout << "" : cout << "Government : " << users.getElementAtposition(i).getGovern() << endl;
+			cout << "Email : " << users.getElementAtposition(i).getEmail() << endl;
+			cout << "Gender : " << users.getElementAtposition(i).getGender() << endl;
+			cout << "Phone Number : " << users.getElementAtposition(i).getphoneNumber() << endl;
+			!(users.getElementAtposition(i).getVaccine().getVaccineCompanyName() == " ") ? cout << "Vaccine Company Name : " << users.getElementAtposition(i).getVaccine().getVaccineCompanyName() << "\nNumber of Doses Should be Taken : " << users.getElementAtposition(i).getNumberOfDosesTaken() << endl : cout << "";
 			index = i;
 			break;
 		}
@@ -738,7 +1090,7 @@ int checkIdValidation(string id) {
 	return 200;
 }
 bool isFound(string id) {
-	
+
 	for (int i = 0; i < IDS.getcount(); i++) {
 		if (IDS.getElementAtposition(i) == id) {
 			return true;
@@ -768,9 +1120,9 @@ bool checkEmail(string email) {
 	return true;
 }
 
-void getInitAllData(){
+void getInitAllData() {
 	getAllVaccines();
-	getAllUsersDate();
+	getAllUsersData();
 	getAllCountries();
 	getAllGoverns();
 	getAllIDS();
@@ -804,7 +1156,7 @@ void getAllIDS() {
 }
 
 bool checkCountryExsist(string country) {
-	
+
 	for (int i = 0; i < allCountries.getcount(); i++) {
 		if (country == allCountries.getElementAtposition(i)) {
 			return true;
@@ -820,10 +1172,9 @@ bool checkGovernExsist(string govern) {
 	}
 	return false;
 }
-
 void saveData() {
 
-	ofstream AcountsFile , RegisterFile , IDSFile;
+	ofstream AcountsFile, RegisterFile, IDSFile;
 	AcountsFile.open("Files/Accounts.txt");
 	RegisterFile.open("Files/Users.txt");
 	IDSFile.open("Files/IDS.txt");
@@ -856,7 +1207,6 @@ void saveData() {
 	AcountsFile.close();
 	IDSFile.close();
 }
-
 void DisplayStats() {
 	float RequestedPre = (float)User::getRequestedNo() / User::getTotalUsers();
 	float fullyVacPre = (float)User::getVaccinedUsers() / User::getTotalUsers();
@@ -866,5 +1216,43 @@ void DisplayStats() {
 	cout << "Number and percentage of users requested for vaccination: " << User::getRequestedNo() << "  " << RequestedPre * 100 << "%" << endl;
 	cout << "Number of users took at least one dose: " << User::getOneDoseNo() << "  " << oneDosePre * 100 << "%" << endl;
 	cout << "Number of totally vaccined users: " << User::getVaccinedUsers() << "  " << fullyVacPre * 100 << "%" << endl;
+
+}
+
+void displayInformation(User user) {
+	Table date;
+	date.add_row({ "National ID", "Name", "Age", "Gender", "Country","Government","Address","Phone","Email","Password","VaccineType","Number Of Dose","Vaccined" });
+	date.add_row({
+			user.getNationalID(),
+			user.getName(),
+			(to_string(user.getAge()) + ""),
+			user.getGender(),
+			user.getCountry(),
+			user.getGovern(),
+			user.getAddress(),
+			user.getphoneNumber(),
+			user.getEmail(),
+			user.getPassword(),
+			user.getVaccine().getVaccineCompanyName() == "" ? "None" : user.getVaccine().getVaccineCompanyName(),
+			(to_string(user.getNumberOfDosesTaken()) + ""),
+			user.getVacciend() == 0 ? "NO" : "Yes",
+
+
+		});
+	for (size_t i = 0; i < 13; ++i) {
+		date[0][i].format()
+			.font_color(Color::yellow)
+			.font_align(FontAlign::center)
+			.font_style({ FontStyle::bold });
+	}
+	for (size_t i = 0; i < 12; ++i) {
+		date[1][0].format().font_background_color(Color::red).font_align(FontAlign::center);
+
+		date[1][i + 1].format()
+			.font_align(FontAlign::center)
+			.font_style({ FontStyle::bold }).font_background_color(Color::green);
+
+	}
+	cout << date << endl << endl;
 
 }
