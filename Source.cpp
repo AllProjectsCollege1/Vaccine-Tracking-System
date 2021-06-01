@@ -865,6 +865,6 @@ void DisplayStats() {
 	cout << "Total users: " << User::getTotalUsers() << endl;
 	cout << "Number and percentage of users requested for vaccination: " << User::getRequestedNo() << "  " << RequestedPre * 100 << "%" << endl;
 	cout << "Number of users took at least one dose: " << User::getOneDoseNo() << "  " << oneDosePre * 100 << "%" << endl;
-	cout << "Number of totally vaccined users: " << User::getVaccinedUsers << "  " << fullyVacPre * 100 << "%" << endl;
+	cout << "Number of totally vaccined users: " << User::getVaccinedUsers() << "  " << fullyVacPre * 100 << "%" << endl;
 
 }
