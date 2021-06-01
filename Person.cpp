@@ -53,7 +53,7 @@ void Person::setAge(int Age) {
 	age = Age;
 }
 void Person::setPassword(string password) {
-	password = password;
+	this->password = password;
 }
 
 void Person::setCountry(string Country) {

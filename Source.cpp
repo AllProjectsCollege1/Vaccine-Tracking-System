@@ -48,6 +48,7 @@ bool checkCountryExsist(string country);
 bool checkGovernExsist(string govern);
 void DisplayStats();
 void displayInformation(User user);
+void DeleteAccount(string id);
 
 
 
@@ -177,7 +178,7 @@ void SingIn() {
 		bool Delete = false;
 		while (!Delete) {
 			User user;
-			int index;
+			int index = -1;
 			for (int i = 0; i < users.getcount(); i++) {
 				if (id == users.getElementAtposition(i).getNationalID()) {
 					user = users.getElementAtposition(i);
@@ -372,7 +373,7 @@ void SingIn() {
 					else if (num == 8) {
 						string Pass;
 						int lengthOfPass = 0;
-						bool LowerLetter, IsNumber, SpecialCharacter, UpperLetter = false;
+						bool LowerLetter = false ,IsNumber =false, SpecialCharacter =false, UpperLetter = false;
 						while (true) {
 
 							cout << "Enter Password (your password must be more than 8 digits and like Password123$ ): ";
@@ -818,7 +819,7 @@ void AdminPage() {
 	while (true) {
 		int answer;
 		Table table;
-		table.add_row({ "1-Vaccine Data", "2-See Record", "3-Vaccines Statistics", "4-Update Number Of Doses Taken","5-Log Out"});
+		table.add_row({ "1-Vaccine Data", "2-See Record", "3-Vaccines Statistics", "4-Update Number Of Doses Taken","5-Delete An Account", "6-Log Out" });
 		table.row(0).format().font_background_color(Color::red).font_style({ FontStyle::bold, FontStyle::italic });
 		cout << table << endl << endl;
 		cin >> answer;
@@ -882,7 +883,7 @@ void AdminPage() {
 								break;
 							}
 						}
-						else if(ch == 'n'||ch=='N') {
+						else if (ch == 'n' || ch == 'N') {
 							break;
 						}
 						else {
@@ -894,10 +895,17 @@ void AdminPage() {
 			}
 		}
 		else if (answer == 5) {
+			string id;
+				cout << "Enter User ID To Delete The Accout : ";
+				ws(cin);
+				getline(cin, id);
+				DeleteAccount(id);
+		}
+		else if (answer == 6) {
 			break;
 		}
 		else {
-			cout << "Wrong Answer , Enter A Number from(1 to 5)" << endl;
+			cout << "Wrong Answer , Enter A Number from(1 to 6)" << endl;
 		}
 	}
 }
@@ -1255,4 +1263,22 @@ void displayInformation(User user) {
 	}
 	cout << date << endl << endl;
 
+}
+
+void DeleteAccount(string id) {
+	int  index = -1;
+	for (int i = 0; i < users.getcount(); i++) {
+		if (users.getElementAtposition(i).getNationalID() == id) {
+			index = i;
+			break;
+		}
+	}
+	if (index == -1) {
+		cout << "Sorry , Cannot find this user , please try again later" << endl;
+	}
+	else {
+		users.RemoveElement(index);
+		saveData();
+		cout << "Deleted Successfully" << endl;
+	}
 }
