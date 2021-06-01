@@ -39,7 +39,6 @@ void AdminPage(); //Admin Page
 void RequestVaccine(User& u, int index);
 void getAllUsersData();
 void saveData();
-void DisplayData(string id);
 int checkIdValidation(string id);
 bool isFound(string id);
 bool checkPhoneNumber(string phoneNumber);
@@ -49,6 +48,7 @@ bool checkGovernExsist(string govern);
 void DisplayStats();
 void displayInformation(User user);
 void DeleteAccount(string id);
+void displayInformation(User user);
 
 
 
@@ -295,7 +295,12 @@ void SingIn() {
 						else {
 							govern = "none";
 						}
-
+						if (country == "egypt") {
+							user.setIsAbroad(true);
+						}
+						else {
+							user.setIsAbroad(false);
+						}
 						user.setCountry(country);
 						user.setGovern(govern);
 						users.RemoveElement(index);
@@ -676,26 +681,50 @@ void Register() {
 
 
 	Vaccine vac;
-	User u(
-		name,
-		nid,
-		gender,
-		age,
-		address,
-		phoneNumber,
-		country,
-		government,
-		password,
-		Email,
-		vac,
-		-1,
-		false,
-		false
-	);
-	users.append(u);
-	User::incTotalUsers();
-	saveData();
+	if (country == "egypt") {
+		User u(
+			name,
+			nid,
+			gender,
+			age,
+			address,
+			phoneNumber,
+			country,
+			government,
+			password,
+			Email,
+			vac,
+			-1,
+			false,
+			false
+		);
+		users.append(u);
+		User::incTotalUsers();
+		saveData();
+	}
+	else {
+		User u(
+			name,
+			nid,
+			gender,
+			age,
+			address,
+			phoneNumber,
+			country,
+			government,
+			password,
+			Email,
+			vac,
+			-1,
+			true,
+			false
+		);
+			users.append(u);
+			User::incTotalUsers();
+			saveData();
+	}
 }
+
 
 void getAllVaccines() {
 	//intial vaccine to store it
@@ -832,7 +861,21 @@ void AdminPage() {
 			string id;
 			ws(cin);
 			getline(cin, id);
-			DisplayData(id);
+			User u;
+			bool found = false;
+			for (int i = 0; i < users.getcount(); i++) {
+				if (id == users.getElementAtposition(i).getNationalID()) {
+					u = users.getElementAtposition(i);
+					found = true;
+					break;
+				}
+			}
+			if (found) {
+				displayInformation(u);
+			}
+			else {
+				cout << "Didn't found this user , pleaser try again later" << endl;
+			}
 		}
 		else if (answer == 3) {
 			DisplayStats();
@@ -857,28 +900,34 @@ void AdminPage() {
 					break;
 				}
 				else {
-					cout << "User Name : " << users.getElementAtposition(index).getName() << endl;
+					cout << "User Name : " << user.getName() << endl;
 					cout << "Number Of Doses Should Be Taken : ";
-					(users.getElementAtposition(index).getNumberOfDosesTaken() == -1) ? cout << "0" << endl : cout << users.getElementAtposition(index).getNumberOfDosesTaken() << endl;
-
+					(user.getNumberOfDosesTaken() == -1) ? cout << "0" << endl : cout << user.getNumberOfDosesTaken() << endl;
+									
 					char ch;
 					while (true) {
 						cout << "Did This User Take A Dose (Y/N) ?";
 						cin >> ch;
 						if (ch == 'Y' || ch == 'y') {
-							if (users.getElementAtposition(index).getNumberOfDosesTaken() == 0) {
+							if (user.getNumberOfDosesTaken() == 0) {
 								cout << "This Person is already get Vaccined" << endl;
 								break;
 							}
-							else if (users.getElementAtposition(index).getNumberOfDosesTaken() == -1) {
+							else if (user.getNumberOfDosesTaken() == -1) {
 								cout << "This Person didn't request any vaccine , yet" << endl;
 								break;
 							}
 							else {
 								user.setNumberOfDosesTaken(user.getNumberOfDosesTaken() - 1);
+								if (user.getVaccine().getNumberofDose() - user.getNumberOfDosesTaken() == user.getVaccine().getNumberofDose()) {
+									User::VaccinedUsers++;
+									user.setVacciend(true);
+								}
+								else if (user.getVaccine().getNumberofDose() - user.getNumberOfDosesTaken() == 1) {
+									User::oneDoseNo++;
+								}
 								users.RemoveElement(index);
 								users.insert(index, user);
-								User::oneDoseNo++;
 								saveData();
 								break;
 							}
@@ -944,11 +993,9 @@ void RequestVaccine(User& u, int index)
 		users.insert(index, temp);
 		saveData();
 		User::incRequestedNo();
-		cout << "English : " << endl;
+		cout << endl;
 		cout << "Congratulations, you have booked an appointment to get the Coronavirus vaccine, and it is " << vacc.getVaccineCompanyName() << " And you have to take a  " << vacc.getNumberofDose() << "number of doses" << endl;
-		cout << "French : " << endl;
-		cout << "Félicitations, vous avez prévu un rendez-vous pour obtenir le vaccin contre le coronavirus et c'est " << vacc.getVaccineCompanyName() << " Vous devez prendre " << vacc.getNumberofDose() << "nombre de doses" << endl;
-
+		cout << endl;
 	}
 
 }
@@ -960,8 +1007,9 @@ void getAllUsersData() {
 	int age;
 	bool getVaccined;
 	bool Abroad;
-	int number_of_doses_taken = 0;
+	int number_of_doses_taken = -1;
 	User u;
+	Vaccine Vacc;
 	int counter = 0;
 	while (getline(usersfile, dataline)) {
 		counter++;
@@ -998,7 +1046,6 @@ void getAllUsersData() {
 			u.setEmail(dataline);
 		}
 		else if (counter == 11) {
-			Vaccine Vacc;
 			for (int i = 0; i < allVaccs.getcount(); i++) {
 				if (dataline == allVaccs.getElementAtposition(i).getVaccineCompanyName()) {
 					Vacc = allVaccs.getElementAtposition(i);
@@ -1020,7 +1067,18 @@ void getAllUsersData() {
 		}
 		else if (counter == 14) {
 			istringstream(dataline) >> number_of_doses_taken;
-			u.setIsAbroad(number_of_doses_taken);
+
+			if (number_of_doses_taken > 0) {
+				if (u.getVaccine().getVaccineCompanyName() != " ") {
+					if (u.getVaccine().getNumberofDose() - number_of_doses_taken == u.getVaccine().getNumberofDose()) {
+						User::VaccinedUsers++;
+					}
+					else if (u.getVaccine().getNumberofDose() - number_of_doses_taken == u.getVaccine().getNumberofDose() - 1) {
+						User::oneDoseNo++;
+					}
+				}
+			}
+			u.setNumberOfDosesTaken(number_of_doses_taken);
 			users.append(u);
 			User::incTotalUsers();
 			counter = 0;
@@ -1028,43 +1086,6 @@ void getAllUsersData() {
 	}
 }
 
-void  DisplayData(string id) {
-
-	int index = 0;
-	for (int i = 0; i < users.getcount(); i++) {
-		if (id == users.getElementAtposition(i).getNationalID())
-		{
-			cout << "National ID : " << users.getElementAtposition(i).getNationalID() << endl;
-			cout << "Name :  " << users.getElementAtposition(i).getName() << endl;
-			cout << "Address: " << users.getElementAtposition(i).getAddress() << endl;
-			cout << "Country : " << users.getElementAtposition(i).getCountry() << endl;
-			users.getElementAtposition(i).getIsAbroad() ? cout << "" : cout << "Government : " << users.getElementAtposition(i).getGovern() << endl;
-			cout << "Email : " << users.getElementAtposition(i).getEmail() << endl;
-			cout << "Gender : " << users.getElementAtposition(i).getGender() << endl;
-			cout << "Phone Number : " << users.getElementAtposition(i).getphoneNumber() << endl;
-			!(users.getElementAtposition(i).getVaccine().getVaccineCompanyName() == " ") ? cout << "Vaccine Company Name : " << users.getElementAtposition(i).getVaccine().getVaccineCompanyName() << "\nNumber of Doses Should be Taken : " << users.getElementAtposition(i).getNumberOfDosesTaken() << endl : cout << "";
-			index = i;
-			break;
-		}
-	}
-	while (true) {
-
-		cout << "Do You Want Delete this Recored ? (y/n) : ";
-		char answer;
-		cin >> answer;
-
-		if (answer == 'y' || answer == 'Y') {
-			users.RemoveElement(index);
-			break;
-		}
-		else if (answer == 'n' || answer == 'N') {
-			break;
-		}
-		else {
-			cout << "Wrong Choice please enter y for yes and n for no" << endl;
-		}
-	}
-}
 
 
 int checkIdValidation(string id) {
@@ -1242,10 +1263,8 @@ void displayInformation(User user) {
 			user.getEmail(),
 			user.getPassword(),
 			user.getVaccine().getVaccineCompanyName() == "" ? "None" : user.getVaccine().getVaccineCompanyName(),
-			(to_string(user.getNumberOfDosesTaken()) + ""),
+			(to_string(user.getNumberOfDosesTaken()) == "-1" ? "0": to_string(user.getNumberOfDosesTaken()) + ""),
 			user.getVacciend() == 0 ? "NO" : "Yes",
-
-
 		});
 	for (size_t i = 0; i < 13; ++i) {
 		date[0][i].format()
@@ -1278,6 +1297,7 @@ void DeleteAccount(string id) {
 	}
 	else {
 		users.RemoveElement(index);
+		User::TotalUsers--;
 		saveData();
 		cout << "Deleted Successfully" << endl;
 	}
