@@ -1300,7 +1300,7 @@ void DeleteAccount(string id) {
 		if (users.getElementAtposition(index).getVaccine().getNumberofDose() - users.getElementAtposition(index).getNumberOfDosesTaken() == users.getElementAtposition(index).getVaccine().getNumberofDose()) {
 			User::VaccinedUsers--;
 		}
-		else if (users.getElementAtposition(index).getNumberOfDosesTaken() - users.getElementAtposition(index).getVaccine().getNumberofDose() == 1) {
+		else if (users.getElementAtposition(index).getVaccine().getNumberofDose() - users.getElementAtposition(index).getNumberOfDosesTaken() == 1) {
 			User::oneDoseNo--;
 		}
 		users.RemoveElement(index);
