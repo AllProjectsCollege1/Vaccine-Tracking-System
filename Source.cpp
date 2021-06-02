@@ -464,6 +464,12 @@ void SingIn() {
 					cout << "Are you sure to delete Your Acount (Y/N) : ";
 					cin >> value;
 					if (value[0] == 'y' || value[0] == 'Y') {
+						if (users.getElementAtposition(index).getVaccine().getNumberofDose() - users.getElementAtposition(index).getNumberOfDosesTaken() == users.getElementAtposition(index).getVaccine().getNumberofDose()) {
+							User::VaccinedUsers--;
+						}
+						else if (users.getElementAtposition(index).getVaccine().getNumberofDose() - users.getElementAtposition(index).getNumberOfDosesTaken() == 1) {
+							User::oneDoseNo--;
+						}
 						users.RemoveElement(index);
 						saveData();
 						User::TotalUsers--;
