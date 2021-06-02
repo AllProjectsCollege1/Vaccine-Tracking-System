@@ -1297,6 +1297,12 @@ void DeleteAccount(string id) {
 		cout << "Sorry , Cannot find this user , please try again later" << endl;
 	}
 	else {
+		if (users.getElementAtposition(index).getVaccine().getNumberofDose() - users.getElementAtposition(index).getNumberOfDosesTaken() == users.getElementAtposition(index).getVaccine().getNumberofDose()) {
+			User::VaccinedUsers--;
+		}
+		else if (users.getElementAtposition(index).getNumberOfDosesTaken() - users.getElementAtposition(index).getVaccine().getNumberofDose() == 1) {
+			User::oneDoseNo--;
+		}
 		users.RemoveElement(index);
 		User::TotalUsers--;
 		saveData();
