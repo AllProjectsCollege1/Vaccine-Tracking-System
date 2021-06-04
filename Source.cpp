@@ -927,18 +927,85 @@ void AdminPage() {
 								break;
 							}
 							else {
-								user.setNumberOfDosesTaken(user.getNumberOfDosesTaken() - 1);
-								if (user.getVaccine().getNumberofDose() - user.getNumberOfDosesTaken() == user.getVaccine().getNumberofDose()) {
-									User::VaccinedUsers++;
-									user.setVacciend(true);
+								if (user.getVaccine().getNumberofDose() - user.getNumberOfDosesTaken() == 0) {
+									cout << "Enter The Day Of this First Vaccine" << endl;
+									while (true) {
+										int day, month, year;
+										cout << "Day : ";
+										cin >> day;
+										cout << "Month : ";
+										cin >> month;
+										cout << "Year : ";
+										cin >> year;
+
+										if (year < 2020 || year > 2023) {
+											cout << "Sorry This data is not valid , please try again" << endl;
+										}
+										else if (month > 12) {
+											cout << "Sorry This data is not valid , please try again" << endl;
+										}
+										else if ((month == 2 && year % 4 == 0 && day > 29)) {
+											cout << "Sorry That Date is Not Valid Try Again" << endl;
+											cout << endl;
+										}
+										else if (month == 2 && year % 4 != 0 && day > 28) {
+											cout << "Sorry That Date is Not Valid Try Again" << endl;
+											cout << endl;
+										}
+										else if (month < 8 && month % 2 == 0 && day >= 31) {
+											cout << "Sorry That Date is Not Valid Try Again" << endl;
+											cout << endl;
+										}
+										else if (month >= 8 && month % 2 != 0 && day >= 31) {
+											cout << "Sorry That Date is Not Valid Try Again" << endl;
+											cout << endl;
+										}
+										else {
+											if (year >= user.getFirstDoseYear()) {
+												if (month >= user.getFirstDoseMonth() && day >= user.getFirstDoseDay()) {
+													user.setNumberOfDosesTaken(user.getNumberOfDosesTaken() - 1);
+													if (user.getVaccine().getNumberofDose() - user.getNumberOfDosesTaken() == user.getVaccine().getNumberofDose()) {
+														User::VaccinedUsers++;
+														user.setVacciend(true);
+													}
+													else if (user.getVaccine().getNumberofDose() - user.getNumberOfDosesTaken() == 1) {
+														User::oneDoseNo++;
+													}
+													user.setFirstDoseDate(day, month, year);
+													user.setSecondDoseDate();
+													users.RemoveElement(index);
+													users.insert(index, user);
+													saveData();
+													break;
+												}
+												else {
+													cout << "Too , Early To take this does , please try again later" << endl;
+													break;
+												}
+											}
+											else {
+												cout << "Too , Early To take this does , please try again later" << endl;
+												break;
+											}
+										}
+									}
+									break;
 								}
-								else if (user.getVaccine().getNumberofDose() - user.getNumberOfDosesTaken() == 1) {
-									User::oneDoseNo++;
+								else {
+									user.setNumberOfDosesTaken(user.getNumberOfDosesTaken() - 1);
+									if (user.getVaccine().getNumberofDose() - user.getNumberOfDosesTaken() == user.getVaccine().getNumberofDose()) {
+										User::VaccinedUsers++;
+										user.setVacciend(true);
+									}
+									else if (user.getVaccine().getNumberofDose() - user.getNumberOfDosesTaken() == 1) {
+										User::oneDoseNo++;
+									}
+									users.RemoveElement(index);
+									users.insert(index, user);
+									saveData();
+									cout << "Congratulations , This Person take his second does and ,  Vaccined Successfully" << endl;
+									break;
 								}
-								users.RemoveElement(index);
-								users.insert(index, user);
-								saveData();
-								break;
 							}
 						}
 						else if (ch == 'n' || ch == 'N') {
