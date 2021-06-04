@@ -8,11 +8,11 @@ class Queues
 	int capacity;
 	int front, back;
 public:
-	Queues(void);
+	Queues(int size);
 	int lenght();
 	T Front();
 	bool empty();
-	void Expand();
+	bool isFull();
 	void enqueue(T);
 	void dequeue();
 	~Queues(void);

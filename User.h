@@ -5,6 +5,12 @@
 
 using namespace std;
 
+struct date {
+
+	int day = 0;
+	int month = 0;
+	int year = 2020;
+};
 
 class User : public Person
 {
@@ -12,7 +18,8 @@ class User : public Person
 	int number_of_doses_taken;
 	bool vaccined;
 	bool isAbroad;
-
+	date firstVaccineDoseDate;
+	date SecondVaccineDoseDate;
 public:
 	static int TotalUsers;
 	static int RequestedNo;
@@ -35,7 +42,14 @@ public:
 		bool vaccined,
 		bool isAbroad
 	);
-
+	void setFirstDoseDate(int day , int month ,int year);
+	void setSecondDoseDate();
+	int getFirstDoseDay();
+	int getFirstDoseMonth();
+	int getFirstDoseYear();
+	int getSecondDoseDay();
+	int getSecondDoseMonth();
+	int getSecondDoseYear();
 	void setName(string name);
 	void setVacciend(bool vacciend);
 	void setIsAbroad(bool isAbroad);

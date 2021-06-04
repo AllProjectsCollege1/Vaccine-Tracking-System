@@ -7,7 +7,8 @@
 #include <fstream>
 #include <sstream>
 #include<algorithm>
-
+#include"Queues.cpp"
+#include "Requests.h"
 
 //External Library to make a table 
 #include"tabulate/tabulate.hpp"
@@ -24,15 +25,18 @@ ArrayList<string>vaccinedata;
 ArrayList<string>IDS;
 ArrayList<string>allCountries;
 ArrayList<string>allGoverns;
+ArrayList<Requests>allRequests;
+
 
 
 void getInitAllData();
+void getAllRequests();
 void displayVaccinesInfo(); //display a table of information about every vaccine
 void getAllVaccines(); // get the data from vaccines file
 void getAllCountries();
 void getAllIDS();
 void getAllGoverns();
-void SingIn(); //Sign In (LogIn) function
+void LogIn(); //Sign In (LogIn) function
 void Register(); //Register Function
 void AdminLogIn(); //AdminLogin
 void AdminPage(); //Admin Page
@@ -49,6 +53,7 @@ void DisplayStats();
 void displayInformation(User user);
 void DeleteAccount(string id);
 void displayInformation(User user);
+void deleteAllAccounts();
 
 
 
@@ -80,7 +85,7 @@ int main() {
 		switch (answer[0])
 		{
 		case '1':
-			SingIn();
+			LogIn();
 			break;
 		case '2':
 			Register();
@@ -108,19 +113,17 @@ int main() {
 	return 0;
 }
 
-void SingIn() {
+void LogIn() {
 
 	string mytext;
 	ifstream data("Files\\Accounts.txt");
-	for (int i = 0; i < dataUsersLogIn.getcount(); i++) {
-		dataUsersLogIn.RemoveElement(i);
-	}
+	dataUsersLogIn.deleteAllElements();
 	while (getline(data, mytext))
 	{
 		dataUsersLogIn.append(mytext);
-
 	}
 	data.close();
+
 
 	string id;
 	string password;
@@ -722,8 +725,8 @@ void Register() {
 			Email,
 			vac,
 			-1,
-			true,
-			false
+			false,
+			true
 		);
 			users.append(u);
 			User::incTotalUsers();
@@ -854,7 +857,7 @@ void AdminPage() {
 	while (true) {
 		int answer;
 		Table table;
-		table.add_row({ "1-Vaccine Data", "2-See Record", "3-Vaccines Statistics", "4-Update Number Of Doses Taken","5-Delete An Account", "6-Log Out" });
+		table.add_row({ "1-Vaccine Data", "2-See Record", "3-Vaccines Statistics", "4-Update Number Of Doses Taken","5-Delete An Account","6-Delete All Accounts", "7-See Waiting List" ,"8-Log Out" });
 		table.row(0).format().font_background_color(Color::red).font_style({ FontStyle::bold, FontStyle::italic });
 		cout << table << endl << endl;
 		cin >> answer;
@@ -957,10 +960,137 @@ void AdminPage() {
 				DeleteAccount(id);
 		}
 		else if (answer == 6) {
+			deleteAllAccounts();
+		}
+		else if (answer == 7) {
+			if (allRequests.getcount() > 0) {
+				Queues<Requests> q(allRequests.getcount());
+				for (int i = 0; i < allRequests.getcount(); i++) {
+					q.enqueue(allRequests.getElementAtposition(i));
+
+					cout << "User ID : " << allRequests.getElementAtposition(i).getUserID() << endl;
+					cout << "Vaccine Company Name : " << allRequests.getElementAtposition(i).getVaccineName() << endl;
+					cout << "Request Number : " << allRequests.getElementAtposition(i).getRequestNumber() << endl;
+
+				}
+				cout << "======================================================" << endl;
+				cout << "Do You Want To Approve an Request ? (Y/N) " << endl;
+				cout << "======================================================" << endl;
+				char ch;
+				cin >> ch;
+				if (ch == 'Y' || ch == 'y') {
+					char  complete = 'Y';
+					while (true) {
+						User u;
+						int index = -1;
+						Vaccine vacc;
+						cout << "==================================================" << endl;
+						cout << "User ID : " << q.Front().getUserID() << endl;
+						cout << "Vaccine Company Name : " << q.Front().getUserID() << endl;
+						cout << "Request Number : " << q.Front().getRequestNumber() << endl;
+						cout << "===================================================" << endl;
+						string id = q.Front().getUserID();
+						cout << id << endl;
+						for (int i = 0; i < users.getcount(); i++) {
+							if (id == users.getElementAtposition(i).getNationalID()) {
+								index = i;
+								u = users.getElementAtposition(i);
+								break;
+							}
+						}
+						for (int i = 0; i < allVaccs.getcount(); i++) {
+							if (q.Front().getVaccineName() == allVaccs.getElementAtposition(i).getVaccineCompanyName()) {
+								vacc = allVaccs.getElementAtposition(i);
+								break;
+							}
+						}
+						cout << "Enter First Dose Date (Make Sure That 'if there is another does it will be after 3 weeks from this date')" << endl;
+						while (true) {
+							int day, month, year;
+							cout << "Day : ";
+							cin >> day;
+							cout << "Month : ";
+							cin >> month;
+							cout << "Year : ";
+							cin >> year;
+
+							if (year < 2020 || year > 2023) {
+								cout << "Sorry This data is not valid , please try again" << endl;
+							}
+							else if (month > 12) {
+								cout << "Sorry This data is not valid , please try again" << endl;
+							}
+							else if ((month == 2 && year % 4 == 0 && day > 29)) {
+								cout << "Sorry That Date is Not Valid Try Again" << endl;
+								cout << endl;
+							}
+							else if (month == 2 && year % 4 != 0 && day > 28) {
+								cout << "Sorry That Date is Not Valid Try Again" << endl;
+								cout << endl;
+							}
+							else if (month < 8 && month % 2 == 0 && day >= 31) {
+								cout << "Sorry That Date is Not Valid Try Again" << endl;
+								cout << endl;
+							}
+							else if (month >= 8 && month % 2 != 0 && day >= 31) {
+								cout << "Sorry That Date is Not Valid Try Again" << endl;
+								cout << endl;
+							}
+							else {
+								u.setVaccine(vacc);
+								u.setFirstDoseDate(day, month, year);
+								u.setSecondDoseDate();
+								u.setNumberOfDosesTaken(vacc.getNumberofDose());
+								users.RemoveElement(index);
+								users.insert(index, u);
+								allRequests.RemoveElement(0);
+								q.dequeue();
+								saveData();
+								cout << "Done This User Would Take This Vaccine" << endl;
+								break;
+							}
+						}
+						if (allRequests.getcount() != 0) {
+							cout << "Do You Want Complete To See The Next Request(Y / N)? : ";
+							while (true) {
+								cin >> complete;
+								if (complete == 'y' || complete == 'Y' || complete == 'n' || complete == 'N')
+									break;
+								else
+									cout << "Wrong Input Please Enter 'y' for Yes or 'n' for No" << endl;
+								cout << endl;
+							}
+							if (complete == 'n' || complete == 'N') {
+								break;
+							}
+						}
+						else {
+							cout << endl;
+							cout << "All Requests Are Finished" << endl;
+							cout << endl;
+							break;
+						}
+					
+					}
+				}
+				else if (ch == 'n' || ch == 'N') {
+					
+				}
+				else {
+					cout<<"Wrong Choice , try again later" << endl;
+				}
+			}
+			else {
+				cout << endl;
+				cout << "NO REQUESTS , YET" << endl;
+				cout << endl;
+			}
+		}
+		else if (answer == 8) {
 			break;
 		}
 		else {
-			cout << "Wrong Answer , Enter A Number from(1 to 6)" << endl;
+			cout << "Wrong Answer , Enter A Number from(1 to 7)" << endl;
 		}
 	}
 }
@@ -969,6 +1099,7 @@ void RequestVaccine(User& u, int index)
 {
 	string mytext;
 	ifstream data("Files\\Vaccines.txt");
+	vaccinedata.deleteAllElements();
 	while (getline(data, mytext))
 	{
 		vaccinedata.append(mytext);
@@ -987,20 +1118,28 @@ void RequestVaccine(User& u, int index)
 	cout << "Enter Your Choice (Please , Make Sure to Choose one of the above Vaccines (1-6) : ";
 	int choice;
 	cin >> choice;
-	if (choice <= 0 || choice > 6) {
-		cout << "Wrong choice" << endl;
+	if (!u.getVacciend()) {
+		if (choice <= 0 || choice > 6) {
+			cout << "Wrong choice" << endl;
+		}
+		else {
+			Requests::totalNumberofRequests++;
+			Vaccine vacc = allVaccs.getElementAtposition(choice - 1);
+			Requests r;
+			r.setUserID(u.getNationalID());
+			r.setVaccineName(vacc.getVaccineCompanyName());
+			r.setRequestNumber(to_string(Requests::totalNumberofRequests));
+			allRequests.append(r);
+			saveData();
+			cout << endl;
+			cout << "Congratulation , you have request a vaccine, you are now on waiting list , please enter to your account later to know the date of the doses you should take , THANK YOU!" << endl;
+			cout << endl;
+			User::RequestedNo++;
+		}
 	}
 	else {
-		Vaccine vacc = allVaccs.getElementAtposition(choice - 1);
-		User temp = u;
-		temp.setNumberOfDosesTaken(vacc.getNumberofDose());
-		temp.setVaccine(vacc);
-		users.RemoveElement(index);
-		users.insert(index, temp);
-		saveData();
-		User::incRequestedNo();
 		cout << endl;
-		cout << "Congratulations, you have booked an appointment to get the Coronavirus vaccine, and it is " << vacc.getVaccineCompanyName() << " And you have to take a  " << vacc.getNumberofDose() << "number of doses" << endl;
+		cout << "Sorry , but you have already get Vaccined" << endl;
 		cout << endl;
 	}
 
@@ -1015,8 +1154,10 @@ void getAllUsersData() {
 	bool Abroad;
 	int number_of_doses_taken = -1;
 	User u;
-	Vaccine Vacc;
 	int counter = 0;
+	int day = 0; 
+	int month = 0;
+	int year = 0;
 	while (getline(usersfile, dataline)) {
 		counter++;
 
@@ -1052,13 +1193,14 @@ void getAllUsersData() {
 			u.setEmail(dataline);
 		}
 		else if (counter == 11) {
+			Vaccine Vacc;
 			for (int i = 0; i < allVaccs.getcount(); i++) {
 				if (dataline == allVaccs.getElementAtposition(i).getVaccineCompanyName()) {
 					Vacc = allVaccs.getElementAtposition(i);
-					User::incRequestedNo();
+					//Requests::totalNumberofRequests++;
+					User::RequestedNo++;
 					break;
 				}
-
 			}
 			u.setVaccine(Vacc);
 		}
@@ -1086,6 +1228,18 @@ void getAllUsersData() {
 				}
 			}
 			u.setNumberOfDosesTaken(number_of_doses_taken);
+			
+		}
+		else if (counter == 15) {
+			istringstream(dataline) >> day;
+		}
+		else if (counter == 16) {
+			istringstream(dataline) >> month;
+		}
+		else if (counter == 17) {
+			istringstream(dataline) >> year;
+			u.setFirstDoseDate(day, month, year);
+			u.setSecondDoseDate();
 			users.append(u);
 			User::incTotalUsers();
 			counter = 0;
@@ -1157,6 +1311,7 @@ bool checkEmail(string email) {
 }
 
 void getInitAllData() {
+	getAllRequests();
 	getAllVaccines();
 	getAllUsersData();
 	getAllCountries();
@@ -1210,10 +1365,16 @@ bool checkGovernExsist(string govern) {
 }
 void saveData() {
 
-	ofstream AcountsFile, RegisterFile, IDSFile;
+	ofstream AcountsFile, RegisterFile,IDSFile,RequestsFile;
+	RequestsFile.open("Files/Requests.txt");
 	AcountsFile.open("Files/Accounts.txt");
 	RegisterFile.open("Files/Users.txt");
 	IDSFile.open("Files/IDS.txt");
+	for (int i = 0; i < allRequests.getcount(); i++) {
+		RequestsFile << allRequests.getElementAtposition(i).getUserID() << endl;
+		RequestsFile << allRequests.getElementAtposition(i).getVaccineName() << endl;
+		RequestsFile << allRequests.getElementAtposition(i).getRequestNumber() << endl;
+	}
 	for (int i = 0; i < users.getcount(); i++) {
 		IDSFile << users.getElementAtposition(i).getNationalID() << endl;
 
@@ -1237,8 +1398,12 @@ void saveData() {
 		RegisterFile << users.getElementAtposition(i).getIsAbroad() << endl;
 		RegisterFile << users.getElementAtposition(i).getVacciend() << endl;
 		RegisterFile << users.getElementAtposition(i).getNumberOfDosesTaken() << endl;
+		RegisterFile << users.getElementAtposition(i).getFirstDoseDay() << endl;
+		RegisterFile << users.getElementAtposition(i).getFirstDoseMonth() << endl;
+		RegisterFile << to_string(users.getElementAtposition(i).getFirstDoseYear()) << endl;
 
 	}
+	RequestsFile.close();
 	RegisterFile.close();
 	AcountsFile.close();
 	IDSFile.close();
@@ -1257,38 +1422,54 @@ void DisplayStats() {
 
 void displayInformation(User user) {
 	Table date;
-	date.add_row({ "National ID", "Name", "Age", "Gender", "Country","Government","Address","Phone","Email","Password","VaccineType","Number Of Dose","Vaccined" });
+	date.add_row({ "National ID", "Name", "Age", "Gender", "Country","Government","Address","Phone","Email","Password" });
 	date.add_row({
-			user.getNationalID(),
-			user.getName(),
-			(to_string(user.getAge()) + ""),
-			user.getGender(),
-			user.getCountry(),
-			user.getGovern(),
-			user.getAddress(),
-			user.getphoneNumber(),
-			user.getEmail(),
-			user.getPassword(),
-			user.getVaccine().getVaccineCompanyName() == "" ? "None" : user.getVaccine().getVaccineCompanyName(),
-			(to_string(user.getNumberOfDosesTaken()) == "-1" ? "0": to_string(user.getNumberOfDosesTaken()) + ""),
-			user.getVacciend() == 0 ? "NO" : "Yes",
+		user.getNationalID(),
+		user.getName(),
+		(to_string(user.getAge()) + ""),
+		user.getGender(),
+		user.getCountry(),
+		user.getGovern(),
+		user.getAddress(),
+		user.getphoneNumber(),
+		user.getEmail(),
+		user.getPassword()
 		});
-	for (size_t i = 0; i < 13; ++i) {
-		date[0][i].format()
-			.font_color(Color::yellow)
-			.font_align(FontAlign::center)
+	date.add_row({"VaccineType", "Number Of Dose Taken", "First Dose Date", "Second Dose Date", "Vaccined"});
+
+	date.add_row({
+			user.getVaccine().getVaccineCompanyName() == " " ? "None" : user.getVaccine().getVaccineCompanyName(),
+			(to_string(user.getNumberOfDosesTaken()) == "-1" ? "0" : to_string(user.getVaccine().getNumberofDose() - user.getNumberOfDosesTaken()) + ""),
+			(user.getFirstDoseDay() != 0)?(to_string(user.getFirstDoseDay()) + "/" + to_string(user.getFirstDoseMonth()) + "/" + to_string(user.getFirstDoseYear())) : "-",
+			(user.getVaccine().getNumberofDose() == 2) ? (to_string(user.getSecondDoseDay()) + "/" + to_string(user.getSecondDoseMonth()) + "/" + to_string(user.getSecondDoseYear())) : "-",
+			user.getVacciend() == 0 ? "NO" : "Yes"
+		});
+	date.row(0).format().font_color(Color::yellow)
+		.font_align(FontAlign::center)
+		.font_style({ FontStyle::bold });
+
+	date[1][0].format()
+		.font_background_color(Color::red)
+		.font_style({ FontStyle::bold });
+
+	for (int i = 1; i < 10; i++) {
+		date[1][i].format()
+			.font_background_color(Color::green)
 			.font_style({ FontStyle::bold });
 	}
-	for (size_t i = 0; i < 12; ++i) {
-		date[1][0].format().font_background_color(Color::red).font_align(FontAlign::center);
 
-		date[1][i + 1].format()
-			.font_align(FontAlign::center)
-			.font_style({ FontStyle::bold }).font_background_color(Color::green);
+	date.row(2).format().font_color(Color::yellow)
+		.font_align(FontAlign::center)
+		.font_style({ FontStyle::bold });
 
+	for (int i = 0; i < 5; i++) {
+		date[3][i].format()
+			.font_background_color(Color::red)
+			.font_style({ FontStyle::bold });
 	}
-	cout << date << endl << endl;
 
+	cout << date << endl << endl;
+	
 }
 
 void DeleteAccount(string id) {
@@ -1314,4 +1495,44 @@ void DeleteAccount(string id) {
 		saveData();
 		cout << "Deleted Successfully" << endl;
 	}
+}
+
+void getAllRequests() {
+	
+	ifstream readFromFile;
+	readFromFile.open("Files/Requests.txt");
+	string data;
+	Requests r;
+	int counter = 0;
+	while (getline(readFromFile, data)) {
+		counter++;
+		if (counter == 1) {
+			r.setUserID(data);
+		}
+		else if (counter == 2) {
+			r.setVaccineName(data);
+		}
+		else if (counter == 3) {
+			r.setRequestNumber(data);
+			allRequests.append(r);
+			//Requests::totalNumberofRequests++;
+			User::RequestedNo++;
+			counter = 0;
+		}
+	}
+	readFromFile.close();
+}
+
+void deleteAllAccounts() {
+	User::TotalUsers = 0;
+	User::oneDoseNo = 0;
+	User::VaccinedUsers = 0;
+	User::RequestedNo = 0;
+	Requests::totalNumberofRequests = 0;
+	users.deleteAllElements();
+	dataUsersLogIn.deleteAllElements();
+	IDS.deleteAllElements();
+	allRequests.deleteAllElements();
+	saveData();
+	cout << "All Data Deleted Successfully" << endl;
 }

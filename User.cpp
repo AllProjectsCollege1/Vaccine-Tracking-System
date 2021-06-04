@@ -54,6 +54,88 @@ User::User(
 
 }
 
+void User::setFirstDoseDate(int day, int month, int year) {
+	firstVaccineDoseDate.day = day;
+	firstVaccineDoseDate.month = month;
+	firstVaccineDoseDate.year = year;
+}
+
+void User::setSecondDoseDate() {
+	int day = 0;
+	int month = 0;
+	int year = 0;
+	if (this->getVaccine().getNumberofDose() > 1) {
+		if (firstVaccineDoseDate.month != 2) {
+			if ((firstVaccineDoseDate.month < 8 && firstVaccineDoseDate.month % 2 != 0) || (firstVaccineDoseDate.month >= 8 && firstVaccineDoseDate.month % 2 == 0)) {
+				if (firstVaccineDoseDate.day > 10) {
+					if (firstVaccineDoseDate.month == 12) {
+						day = (firstVaccineDoseDate.day + 21) - 31;
+						month = 1;
+						year = firstVaccineDoseDate.year + 1;
+					}
+					else {
+						day = (firstVaccineDoseDate.day + 21) - 31;
+						month = firstVaccineDoseDate.month + 1;
+						year = firstVaccineDoseDate.year;
+					}
+				}
+				else {
+					day = firstVaccineDoseDate.day + 21;
+					month = firstVaccineDoseDate.month;
+					year = firstVaccineDoseDate.year;
+
+				}
+			}
+			else if ((firstVaccineDoseDate.month < 8 && firstVaccineDoseDate.month % 2 == 0) || (firstVaccineDoseDate.month > 8 && firstVaccineDoseDate.month % 2 != 0)) {
+				if (firstVaccineDoseDate.day > 9) {
+					day = (firstVaccineDoseDate.day + 21) - 30;
+					month = firstVaccineDoseDate.month + 1;
+					year = firstVaccineDoseDate.year;
+				}
+				else {
+					day = firstVaccineDoseDate.day + 21;
+					month = firstVaccineDoseDate.month;
+					year = firstVaccineDoseDate.year;
+				}
+			}
+		}
+		else {
+			if (firstVaccineDoseDate.year % 4 == 0) {
+				if (firstVaccineDoseDate.day > 8) {
+					day = (firstVaccineDoseDate.day + 21) - 29;
+					month = firstVaccineDoseDate.month + 1;
+					year = firstVaccineDoseDate.year;
+
+				}
+				else {
+					day = firstVaccineDoseDate.day + 21;
+					month = firstVaccineDoseDate.month;
+					year = firstVaccineDoseDate.year;
+
+				}
+			}
+			else {
+				if (firstVaccineDoseDate.day > 7) {
+					day = (firstVaccineDoseDate.day + 21) - 28;
+					month = firstVaccineDoseDate.month + 1;
+					year = firstVaccineDoseDate.year;
+
+				}
+				else {
+					day = firstVaccineDoseDate.day + 21;
+					month = firstVaccineDoseDate.month;
+					year = firstVaccineDoseDate.year;
+
+				}
+			}
+		}
+	}
+	
+	SecondVaccineDoseDate.day = day;
+	SecondVaccineDoseDate.month = month;
+	SecondVaccineDoseDate.year = year;
+}
+
 void User::setVacciend(bool vacciend) {
 	this->vaccined = vacciend;
 }
@@ -117,4 +199,22 @@ int User::getTotalUsers() {
 	return TotalUsers;
 }
 
+int User::getFirstDoseDay() {
+	return firstVaccineDoseDate.day;
+}
+int User::getFirstDoseMonth() {
+	return firstVaccineDoseDate.month;
+}
+int User::getFirstDoseYear() {
+	return firstVaccineDoseDate.year;
+}
+int User::getSecondDoseDay() {
+	return SecondVaccineDoseDate.day;
+}
+int User::getSecondDoseMonth() {
+	return SecondVaccineDoseDate.month;
+}
+int User::getSecondDoseYear() {
+	return SecondVaccineDoseDate.year;
+}
 User::~User() {}

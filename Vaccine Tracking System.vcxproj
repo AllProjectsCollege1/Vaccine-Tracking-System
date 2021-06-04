@@ -141,11 +141,9 @@
   <ItemGroup>
     <ClInclude Include="Admin.h" />
     <ClInclude Include="ArrayList.h" />
-    <ClInclude Include="BST.h" />
-    <ClInclude Include="Node.h" />
     <ClInclude Include="Person.h" />
     <ClInclude Include="Queues.h" />
-    <ClInclude Include="stack.h" />
+    <ClInclude Include="Requests.h" />
     <ClInclude Include="tabulate\tabulate.hpp" />
     <ClInclude Include="User.h" />
     <ClInclude Include="Vaccine.h" />
@@ -153,12 +151,10 @@
   <ItemGroup>
     <ClCompile Include="Admin.cpp" />
     <ClCompile Include="ArrayList.cpp" />
-    <ClCompile Include="BST.cpp" />
-    <ClCompile Include="Node.cpp" />
     <ClCompile Include="Person.cpp" />
     <ClCompile Include="Queues.cpp" />
+    <ClCompile Include="Requests.cpp" />
     <ClCompile Include="Source.cpp" />
-    <ClCompile Include="stack.cpp" />
     <ClCompile Include="User.cpp" />
     <ClCompile Include="Vaccine.cpp" />
   </ItemGroup>

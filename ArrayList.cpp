@@ -17,20 +17,13 @@ ArrayList<T>::ArrayList()
 	array = new T[Size];
 }
 template <class T >
-void ArrayList <T>::RemoveElement(int position)
-{
-	if (IsEmpty())
-	{
-		cout << "no elements to remove" << endl;
-	}
-	else {
-		if (position >= 0 && position < count)
-			for (int i = position; i < count; i++) {
+void ArrayList <T>::RemoveElement(int position){
+
+		if (!IsEmpty())
+			for (int i = position; i < count - 1; i++) {
 				array[i] = array[i + 1];
 			}
-
 		count--;
-	}
 }
 template <class T>
 void ArrayList<T>::insert(int position, T value)
@@ -62,7 +55,7 @@ T ArrayList<T>::getElementAtposition(int position)
 	assert(position < count);
 	return array[position];
 }
-template <class T >
+template <class T>
 int ArrayList<T>::getSize()
 {
 	if (count == 0)
@@ -90,6 +83,11 @@ bool ArrayList<T>::IsEmpty()
 {
 	return (count == 0);
 }
+template <class T>
+void ArrayList<T>::deleteAllElements() {
+	count = 0;
+}
+
 template <class T >
 void ArrayList<T>::Expand()
 {
